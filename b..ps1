@@ -26,9 +26,9 @@ public class NtHelpers {
     public static extern IntPtr GetModuleHandle([MarshalAs(UnmanagedType.LPWStr)] string lpModuleName);
 
     [DllImport("kernel32.dll", CharSet=CharSet.Ansi)]
-    public static extern IntPtr LoadLibrary(
+    public static extern IntPtr LoadLibrary(string lpLibFileName);
 
-    [MethodImpl(MethodImplOptions.NoOptimizalining)]
+    [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
     public static int Nop() {
         return 1;
     }
